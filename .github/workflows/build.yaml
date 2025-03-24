@@ -1,4 +1,9 @@
----
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 include:
   - board: nice_nano_v2
     shield: charybdis_qwerty_left
