@@ -2,14 +2,14 @@
 
 ## Intro
 
-This repository offers pre-configured ZMK firmware designed for Wireless Charybdis keyboards, supporting both the ubiquitous QWERTY layout and the optimized Colemak DH layout. You can choose from two configurations:
+This repository offers pre-configured ZMK firmware designed for Wireless Charybdis 4x6 keyboards, supporting both the ubiquitous QWERTY layout and the optimized Colemak DH layout. You can choose from two configurations:
 
 - Bluetooth and USB
 - Dongle
 
 Additionally, this repository automatically generates SVG images of all layers in the keymap, and adds it to the README. It also provides high level instructions and resources on how to customize and build the firmware to meet your specific needs.
 
-Check out the [Charybdis Mini Wireless build guide](https://github.com/280Zo/charybdis-wireless-mini-3x6-build-guide?tab=readme-ov-file) if you haven't yet built your own Charybdis keyboard.
+Check out the [Charybdis Wireless build guide](https://github.com/280Zo/charybdis-wireless-mini-3x6-build-guide?tab=readme-ov-file) if you haven't yet built your own Charybdis keyboard.
 
 ## Usage
 
@@ -28,6 +28,16 @@ There are a few things to note about how the pre-built firmware is configured:
 - The Bluetooth/USB firmware can connect through Bluetooth, but the central side will have a shorter battery life because it needs to maintain that connection.
   - The central side can also be plugged in to USB and the keyboard can be used when Bluetooth on the host computer isn't available (e.g. BIOS navigation)
 - To add support for the PMW3610 low power trackball sensor, badjeff's [zmk-pmw3610-driver](https://github.com/badjeff/zmk-pmw3610-driver), [ZMK Input Behavior Listener](https://github.com/badjeff/zmk-input-behavior-listener?tab=readme-ov-file), and [ZMK Split Peripheral Input Relay](https://github.com/badjeff/zmk-split-peripheral-input-relay) modules are included in the firmware.
+
+## Keyboard Layout
+
+The Charybdis 4x6 features:
+- 4 rows of 6 keys in the main matrix (48 total main keys)
+- 5 thumb keys on the left hand
+- 3 thumb keys on the right hand
+- A trackball on the right hand
+
+This enhanced layout provides additional keys for a more comfortable typing experience while maintaining the ergonomic benefits of the split design.
 
 ## Flashing the Firmware
 
@@ -60,6 +70,8 @@ Here are a few tips for a quick start:
   - When held, the function of the trackball is changed from moving the cursor to scrolling.
   - When double tapped and held, it will reduce the cursor speed for more precision.
   - When single tapped it outputs the escape key.
+
+- The 4th row provides quick access to frequently used symbols and navigation keys.
 
 ![keymap images](keymap-drawer/charybdis.svg)
 

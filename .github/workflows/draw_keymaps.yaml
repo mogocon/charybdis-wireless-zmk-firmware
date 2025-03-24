@@ -35,7 +35,7 @@ on:
         type: string
       draw_args:
         description: "Map of keyboard names to extra `keymap draw` args, e.g. `corne:'-k corne_rotated -l LAYOUT_split_3x5_3'`"
-        default: ""
+        default: "charybdis: '-l LAYOUT_split_4x6_5_3'"
         required: false
         type: string
       commit_message:

@@ -22,7 +22,7 @@ def main():
         '--in-path',
         type=str,
         required=True,
-        help="Path to the input keymap file. This is the path where the ouitput will be stored as well"
+        help="Path to the input keymap file. This is the path where the output will be stored as well"
     )
     # Parse the arguments
     args = parser.parse_args()
@@ -57,7 +57,10 @@ def main():
             # Home row
             'A': 'A', 'S': 'R', 'D': 'S', 'F': 'T', 'G': 'G', 'H': 'M', 'J': 'N', 'K': 'E', 'L': 'I', 'SEMICOLON': 'O',
             # Bottom row
-            'Z': 'Z', 'X': 'X', 'C': 'C', 'V': 'D', 'B': 'V', 'N': 'K', 'M': 'H',
+            'Z': 'Z', 'X': 'X', 'C': 'C', 'V': 'D', 'B': 'V', 'N': 'K', 'M': 'H', 'COMMA': 'COMMA', 'PERIOD': 'PERIOD', 'SLASH': 'SLASH',
+            # For 4th row keys which are usually symbols - keep them the same
+            'GRAVE': 'GRAVE', 'MINUS': 'MINUS', 'EQUAL': 'EQUAL', 'LEFT_BRACKET': 'LEFT_BRACKET', 'RIGHT_BRACKET': 'RIGHT_BRACKET', 
+            'BACKSLASH': 'BACKSLASH', 'SINGLE_QUOTE': 'SINGLE_QUOTE', 'APOSTROPHE': 'APOSTROPHE',
         }
     else:
         initial_keymap = {
@@ -66,7 +69,10 @@ def main():
             # Home row
             'A': 'A', 'R': 'S', 'S': 'D', 'T': 'F', 'G': 'G', 'M': 'H', 'N': 'J', 'E': 'K', 'I': 'L', 'O': 'SEMICOLON',
             # Bottom row
-            'Z': 'Z', 'X': 'X', 'C': 'C', 'D': 'V', 'V': 'B', 'K': 'N', 'H': 'M'
+            'Z': 'Z', 'X': 'X', 'C': 'C', 'D': 'V', 'V': 'B', 'K': 'N', 'H': 'M', 'COMMA': 'COMMA', 'PERIOD': 'PERIOD', 'SLASH': 'SLASH',
+            # For 4th row keys which are usually symbols - keep them the same
+            'GRAVE': 'GRAVE', 'MINUS': 'MINUS', 'EQUAL': 'EQUAL', 'LEFT_BRACKET': 'LEFT_BRACKET', 'RIGHT_BRACKET': 'RIGHT_BRACKET', 
+            'BACKSLASH': 'BACKSLASH', 'SINGLE_QUOTE': 'SINGLE_QUOTE', 'APOSTROPHE': 'APOSTROPHE',
         }
     
     #####################################################################
@@ -103,26 +109,22 @@ def main():
         new_lines = []
         print(">> Converting letter keys")
         for line in lines:
-            # Split the line by spaces or other delimiters
-            parts = line.split()
-            new_parts = []
-
-            for part in parts:
-                if not part.startswith('&'):
-                    # Extract key (removing ZMK behavior commands)
-                    key = part.split()[1] if len(part.split()) > 1 else part
-                    # Map the key to the conversion type if applicable
-                    if key.upper() in initial_keymap:
-                        print(key.upper(),end=":")
-                        new_key = initial_keymap[key]
-                        print(new_key)
-                        new_parts.append(part.replace(key, new_key))
-                    else:
-                        new_parts.append(part)
-                else:
-                    new_parts.append(part)
-            # Join new parts for the line and add to new_lines
-            new_lines.append(' '.join(new_parts))
+            # Enhanced pattern to capture complex ZMK bindings
+            pattern = r'(&[^\s]+\s+[A-Z_]+\s+)?([A-Z_]+)'
+            
+            # Replace keys in the line based on the mapping
+            def replace_key(match):
+                behavior = match.group(1) or ""
+                key = match.group(2)
+                
+                if key in initial_keymap:
+                    print(f"{key}:{initial_keymap[key]}")
+                    return f"{behavior}{initial_keymap[key]}"
+                return match.group(0)
+            
+            # Apply the replacement
+            new_line = re.sub(pattern, replace_key, line)
+            new_lines.append(new_line)
 
         # Join new lines to form the new keymap keymap_contents
         new_keymap = '\n'.join(new_lines)
@@ -130,27 +132,15 @@ def main():
         return before_keymap + format_columns(new_keymap) + after_keymap
     
     def format_columns(text):    
-        zmk_behavior = r'(&\w+)'
-
         # Split the input text into lines
         lines = text.strip().split('\n')
         
-        # Split each line into columns
-        split_lines = [re.split(zmk_behavior,line) for line in lines]
-        
-        # Determine the number of columns
-        num_columns = max(len(line) for line in split_lines)
-        
-        # Calculate the maximum width for each column
-        column_widths = [0] * num_columns
-        for line in split_lines:
-            for i, item in enumerate(line):
-                column_widths[i] = max(column_widths[i], len(item))
-        
-        # Format each line with the calculated column widths
+        # Format each line to maintain alignment using original spaces
         formatted_lines = []
-        for line in split_lines:
-            formatted_line = ''.join(f"{item:<{column_widths[i] + 1}}" for i, item in enumerate(line))
+        for line in lines:
+            # Preserve the original formatting but ensure consistent spacing
+            # between key bindings
+            formatted_line = re.sub(r'\s{2,}', '  ', line)
             formatted_lines.append(formatted_line)
         
         # Join all formatted lines

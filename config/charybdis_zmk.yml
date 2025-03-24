@@ -11,6 +11,9 @@ features:
   - Mouse keys pointer
   - Trackball pointer
   - Dongle/Bluetooth/USB
+description: >
+  The Charybdis is a 4x6 split keyboard with 5 thumb keys on the left, 3 thumb keys plus trackball on the right.
+  It features ZMK wireless firmware, supporting both Bluetooth and USB connectivity.
 siblings:
   - charybdis_left
   - charybdis_right
