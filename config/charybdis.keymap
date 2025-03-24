@@ -66,91 +66,79 @@
     macros {
         shrug_macro: shrug {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_SHRUG";
+            // label 속성 제거 (deprecated)
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         lgtm_macro: lgtm {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_LGTM";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         gcm_macro: gcm {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_GCM";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         sudo_macro: sudo {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_SUDO";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         new_dir_macro: new_dir {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_NEW_DIR";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         studio_unlock_macro: studio_unlock {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_STUDIO_UNLOCK";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         detach_session_macro: detach_session {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_DETACH_SESSION";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         create_or_attach_macro: create_or_attach {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_CREATE_OR_ATTACH";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         next_pane_macro: next_pane {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_NEXT_PANE";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         show_sessions_macro: show_sessions {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_SHOW_SESSIONS";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         sync_panes_macro: sync_panes {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_SYNC_PANES";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         h_split_macro: h_split {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_H_SPLIT";
             #binding-cells = <0>;
             bindings = <&none>;
         };
 
         v_split_macro: v_split {
             compatible = "zmk,behavior-macro";
-            label = "MACRO_V_SPLIT";
             #binding-cells = <0>;
             bindings = <&none>;
         };
