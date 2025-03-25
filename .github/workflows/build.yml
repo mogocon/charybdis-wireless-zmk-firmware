@@ -30,11 +30,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
       
+      - name: Create Shield Directory Structure
+        run: |
+          mkdir -p config/boards/shields/charybdis
+      
+      - name: Copy Shield Files
+        run: |
+          cp -v charybdis_left.overlay config/boards/shields/charybdis/
+          cp -v charybdis_right.overlay config/boards/shields/charybdis/
+          cp -v charybdis.dtsi config/boards/shields/charybdis/
+      
       - name: Check directory structure
-        run: ls -la
-
-      - name: Check config directory
-        run: ls -la config/
+        run: |
+          ls -la
+          ls -la config/
+          ls -la config/boards/shields/charybdis/
       
       - name: West Init
         run: west init -l config
