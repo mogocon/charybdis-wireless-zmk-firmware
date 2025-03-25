@@ -5,15 +5,19 @@
 # the `include` property, e.g:
 #
 # board: [ "nice_nano_v2" ]
-# shield: [ "charybdis_left", "charybdis_right" ]
+# shield: [ "corne_left", "corne_right" ]
 # include:
 #   - board: nice_nano_v2
-#     shield: charybdis_left
+#     shield: corne_left
 #   - board: nice_nano_v2
-#     shield: charybdis_right
+#     shield: corne_right
 
 include:
-  - board: nice_nano_v2
-    shield: charybdis_left
-  - board: nice_nano_v2
-    shield: charybdis_right
+  - board: charybdis_left
+    shield: splinky_v2_left
+  - board: charybdis_right
+    shield: splinky_v2_right
+  - board: charybdis_left
+    shield: splinky_v3_left
+  - board: charybdis_right
+    shield: splinky_v3_right

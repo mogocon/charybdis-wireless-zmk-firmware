@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2023 The ZMK Contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/ {
+    chosen {
+        zmk,trackball = &trackball;
+    };
+};
+
+&trackball {
+    // PMW3610 sensor configuration
+    cpi = <800>;              // Default CPI (counts per inch)
+    time-to-max-speed-ms = <500>;  // Time to reach maximum scroll speed
+    sleep-timeout-ms = <5000>;     // Sleep timeout in milliseconds
+    scroll-mode;             // Enable scroll mode by default
+    scroll-divider = <7>;     // Scroll divider to adjust scrolling speed
+};
+
+/ {
+    behaviors {
+        // Mouse movement behavior
+        msc: mouse_scroll {
+            compatible = "zmk,behavior-mouse-scroll";
+            #binding-cells = <1>;
+            delay-ms = <0>;
+            acceleration-exponent = <1>;
+        };
+        
+        // Mouse click behavior with configurable parameters
+        mkp: mouse_key_press {
+            compatible = "zmk,behavior-mouse-key-press";
+            #binding-cells = <1>;
+            delay-ms = <10>;
+            tapping-term-ms = <110>;
+        };
+        
+        // Mouse movement behavior with configurable parameters
+        mmv: mouse_move {
+            compatible = "zmk,behavior-mouse-move";
+            #binding-cells = <1>;
+            delay-ms = <0>;
+            acceleration-exponent = <1>;
+        };
+    };
+};
