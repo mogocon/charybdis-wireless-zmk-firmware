@@ -24,9 +24,9 @@ jobs:
       matrix:
         include:
           - board: nice_nano_v2
-            shield: charybdis_left
+            shield: splinky_v2_left
           - board: nice_nano_v2
-            shield: charybdis_right
+            shield: splinky_v2_right
           - board: nice_nano_v2
             shield: settings_reset
     steps:
@@ -60,13 +60,12 @@ jobs:
           git config --global --add safe.directory '*'
       - name: West Update
         run: |
-          # GitHub URLs로 직접 연결하는 방식으로 수정
-          sed -i 's|url-base: https://github.com/perillamint|url-base: https://github.com/perillamint.git|g' config/west.yml
-          sed -i 's|revision: charybdis-pmw3610|revision: refs/heads/charybdis-pmw3610|g' config/west.yml
-          cat config/west.yml
+          # GitHub 토큰으로 URL 설정
+          git config --global credential.helper store
+          echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
           
-          # GIT_TERMINAL_PROMPT=0으로 설정하여 인증 프롬프트 비활성화
-          GIT_TERMINAL_PROMPT=0 west update || true
+          # West 업데이트 실행
+          west update || true
           
           # 실패한 경우 직접 클론
           if [ ! -d "zmk" ]; then
@@ -79,6 +78,8 @@ jobs:
             git checkout FETCH_HEAD
             cd ..
           fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: West Zephyr export
         run: west zephyr-export
       - name: West Build (${{ matrix.board }} - ${{ matrix.shield }})
