@@ -223,8 +223,17 @@ jobs:
           find zmk/app/boards/shields -name "*.overlay" | sort
       
       - name: West Build (Charybdis Left Half)
-        run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
-      
+        run: |
+          # charybdis.conf 파일 복사
+          cp config/charybdis.conf config/charybdis_left.conf
+
+          # 빌드 명령 실행
+          west build -s zmk/app -b nice_nano_v2 -- \
+            -DSHIELD=charybdis_left \
+            -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" \
+            -DEXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/charybdis.conf" \
+            -DEXTRA_DTC_OVERLAY_FILE="${GITHUB_WORKSPACE}/zmk/app/boards/shields/charybdis/charybdis_left.overlay"
+
       - name: Charybdis Left Artifacts
         if: success()
         uses: actions/upload-artifact@v4
@@ -233,8 +242,17 @@ jobs:
           path: build/zephyr/zmk.uf2
       
       - name: West Build (Charybdis Right Half)
-        run: west build --pristine -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
-      
+        run: |
+          # charybdis.conf 파일 복사
+          cp config/charybdis.conf config/charybdis_right.conf
+
+          # 빌드 명령 실행
+          west build --pristine -s zmk/app -b nice_nano_v2 -- \
+            -DSHIELD=charybdis_right \
+            -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" \
+            -DEXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/charybdis.conf" \
+            -DEXTRA_DTC_OVERLAY_FILE="${GITHUB_WORKSPACE}/zmk/app/boards/shields/charybdis/charybdis_right.overlay"
+
       - name: Charybdis Right Artifacts
         if: success()
         uses: actions/upload-artifact@v4
