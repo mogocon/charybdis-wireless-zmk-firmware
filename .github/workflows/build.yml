@@ -41,6 +41,10 @@ jobs:
       
       - name: Create Charybdis Module
         run: |
+          # 기존 파일 정리 (중복 파일 방지)
+          rm -rf config/modules
+          
+          # 디렉토리 생성
           mkdir -p config/modules/charybdis
           mkdir -p config/modules/charybdis/boards/shields/charybdis
           
@@ -259,58 +263,48 @@ jobs:
                     path: modules/charybdis
           EOF
       
-      - name: Check Module Structure (상세)
+      - name: Check Module Structure and Files
         run: |
-          echo "===== 전체 모듈 디렉토리 구조 ====="
+          echo "===== 모듈 디렉토리 구조 ====="
           find config/modules -type f | sort
           
-          echo ""
-          echo "===== 중요 파일 내용 확인 ====="
+          echo -e "\n===== 모듈 파일 내용 확인 ====="
           echo "CMakeLists.txt:"
           cat config/modules/charybdis/CMakeLists.txt
           
-          echo ""
-          echo "Module.yml:"
+          echo -e "\nModule.yml:"
           cat config/modules/charybdis/Module.yml
           
-          echo ""
-          echo "Kconfig.shield:"
+          echo -e "\nKconfig:"
+          cat config/modules/charybdis/Kconfig
+          
+          echo -e "\nKconfig.shield:"
           cat config/modules/charybdis/boards/shields/charybdis/Kconfig.shield
           
-          echo ""
-          echo "Kconfig.defconfig:"
+          echo -e "\nKconfig.defconfig:"
           cat config/modules/charybdis/boards/shields/charybdis/Kconfig.defconfig
           
-          echo ""
-          echo "charybdis_left.overlay 시작 부분:"
-          head -15 config/modules/charybdis/boards/shields/charybdis/charybdis_left.overlay
+          echo -e "\nWest.yml 내용:"
+          cat config/west.yml
       
-      - name: Build Debug Info (상세)
+      - name: West Build Debug Info
         run: |
           echo "===== 현재 작업 디렉토리 구조 ====="
           pwd
           ls -la
           
-          echo ""
-          echo "===== ZMK 설정 디렉토리 구조 ====="
+          echo -e "\n===== ZMK 설정 디렉토리 구조 ====="
           find config -type f | sort
           
-          echo ""
-          echo "===== West 모듈 정보 ====="
+          echo -e "\n===== West 모듈 정보 ====="
           west list
           
-          echo ""
-          echo "===== West 설정 정보 ====="
-          west config --show
+          echo -e "\n===== West 설정 정보 ====="
+          west config -l
           
-          echo ""
-          echo "===== 사용 가능한 쉴드 목록 확인 ====="
-          # 쉴드 목록을 출력하기 위한 명령어 (오류가 발생할 수 있음)
+          echo -e "\n===== 사용 가능한 쉴드 목록 확인 ====="
+          echo "아래 명령은 help 출력으로 모든 쉴드가 표시되지 않을 수 있습니다."
           west build -s zmk/app -b nice_nano_v2 -- --help 2>&1 || true
-          
-          echo ""
-          echo "===== ZMK 애플리케이션 정보 ====="
-          ls -la zmk/app 2>/dev/null || echo "zmk/app 디렉토리를 찾을 수 없습니다"
       
       - name: West Build (Charybdis Left Half)
         run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
