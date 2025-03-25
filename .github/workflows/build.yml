@@ -30,11 +30,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
       
-      - name: Create Shield Files Directly in ZMK's Shield Directory
+      - name: West Init
+        run: west init -l config
+      
+      - name: West Update
+        run: west update --stats
+      
+      - name: West Zephyr export
+        run: west zephyr-export
+      
+      - name: Clone and Modify lily58 Shield for Charybdis
         run: |
-          # 쉴드 파일을 ZMK 기본 쉴드 디렉토리에 직접 생성합니다
-          mkdir -p zmk/app/boards/shields/charybdis
+          # lily58 쉴드를 charybdis로 복제
+          cp -r zmk/app/boards/shields/lily58 zmk/app/boards/shields/charybdis
           
+          # 파일 이름 변경
+          mv zmk/app/boards/shields/charybdis/lily58.dtsi zmk/app/boards/shields/charybdis/charybdis.dtsi
+          mv zmk/app/boards/shields/charybdis/lily58_left.overlay zmk/app/boards/shields/charybdis/charybdis_left.overlay
+          mv zmk/app/boards/shields/charybdis/lily58_right.overlay zmk/app/boards/shields/charybdis/charybdis_right.overlay
+          
+          # Kconfig.shield 파일 수정
           cat << 'EOF' > zmk/app/boards/shields/charybdis/Kconfig.shield
           # Copyright (c) 2022 The ZMK Contributors
           # SPDX-License-Identifier: MIT
@@ -46,6 +61,7 @@ jobs:
             def_bool $(shields_list_contains,charybdis_right)
           EOF
           
+          # Kconfig.defconfig 파일 수정
           cat << 'EOF' > zmk/app/boards/shields/charybdis/Kconfig.defconfig
           # Copyright (c) 2022 The ZMK Contributors
           # SPDX-License-Identifier: MIT
@@ -53,21 +69,22 @@ jobs:
           if SHIELD_CHARYBDIS_LEFT
           
           config ZMK_KEYBOARD_NAME
-          default "Charybdis"
+            default "Charybdis"
           
           config ZMK_SPLIT_ROLE_CENTRAL
-          default y
+            default y
           
           endif
           
           if SHIELD_CHARYBDIS_LEFT || SHIELD_CHARYBDIS_RIGHT
           
           config ZMK_SPLIT
-          default y
+            default y
           
           endif
           EOF
           
+          # charybdis.dtsi 파일 수정
           cat << 'EOF' > zmk/app/boards/shields/charybdis/charybdis.dtsi
           /*
            * Copyright (c) 2022 The ZMK Contributors
@@ -128,6 +145,7 @@ jobs:
           };
           EOF
           
+          # charybdis_left.overlay 파일 수정
           cat << 'EOF' > zmk/app/boards/shields/charybdis/charybdis_left.overlay
           /*
            * Copyright (c) 2022 The ZMK Contributors
@@ -165,6 +183,7 @@ jobs:
           };
           EOF
           
+          # charybdis_right.overlay 파일 수정
           cat << 'EOF' > zmk/app/boards/shields/charybdis/charybdis_right.overlay
           /*
            * Copyright (c) 2022 The ZMK Contributors
@@ -201,39 +220,17 @@ jobs:
               status = "okay";
           };
           EOF
-      
-      - name: West Init
-        run: west init -l config
-      
-      - name: West Update
-        run: west update --stats
-      
-      - name: West Zephyr export
-        run: west zephyr-export
-      
-      - name: Check Shield Structure
-        run: |
-          echo "===== ZMK 쉴드 디렉토리 확인 ====="
+          
+          # 쉴드 파일 확인
+          echo "===== 쉴드 디렉토리 확인 ====="
           ls -la zmk/app/boards/shields/
           
           echo -e "\n===== Charybdis 쉴드 파일 확인 ====="
           ls -la zmk/app/boards/shields/charybdis/
-          
-          echo -e "\n===== 사용 가능한 쉴드 목록 확인 ====="
-          find zmk/app/boards/shields -name "*.overlay" | sort
       
       - name: West Build (Charybdis Left Half)
-        run: |
-          # charybdis.conf 파일 복사
-          cp config/charybdis.conf config/charybdis_left.conf
-
-          # 빌드 명령 실행
-          west build -s zmk/app -b nice_nano_v2 -- \
-            -DSHIELD=charybdis_left \
-            -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" \
-            -DEXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/charybdis.conf" \
-            -DEXTRA_DTC_OVERLAY_FILE="${GITHUB_WORKSPACE}/zmk/app/boards/shields/charybdis/charybdis_left.overlay"
-
+        run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      
       - name: Charybdis Left Artifacts
         if: success()
         uses: actions/upload-artifact@v4
@@ -242,17 +239,8 @@ jobs:
           path: build/zephyr/zmk.uf2
       
       - name: West Build (Charybdis Right Half)
-        run: |
-          # charybdis.conf 파일 복사
-          cp config/charybdis.conf config/charybdis_right.conf
-
-          # 빌드 명령 실행
-          west build --pristine -s zmk/app -b nice_nano_v2 -- \
-            -DSHIELD=charybdis_right \
-            -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" \
-            -DEXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/charybdis.conf" \
-            -DEXTRA_DTC_OVERLAY_FILE="${GITHUB_WORKSPACE}/zmk/app/boards/shields/charybdis/charybdis_right.overlay"
-
+        run: west build --pristine -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      
       - name: Charybdis Right Artifacts
         if: success()
         uses: actions/upload-artifact@v4
