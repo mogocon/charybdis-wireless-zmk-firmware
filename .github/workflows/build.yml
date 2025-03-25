@@ -24,14 +24,17 @@ jobs:
       matrix:
         include:
           - board: nice_nano_v2
-            shield: splinky_v2_left
+            shield: charybdis_left
           - board: nice_nano_v2
-            shield: splinky_v2_right
+            shield: charybdis_right
           - board: nice_nano_v2
             shield: settings_reset
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       - name: Cache west modules
         uses: actions/cache@v4
         env:
@@ -42,6 +45,7 @@ jobs:
             tools/
             zephyr/
             bootloader/
+            zmk/
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -49,6 +53,11 @@ jobs:
             ${{ runner.os }}-
       - name: West Init
         run: west init -l config
+      - name: Configure Git for GitHub
+        run: |
+          git config --global url."https://github.com/".insteadOf git://github.com/
+          # 인증없이 공개 저장소에 접근하기 위한 설정
+          git config --global --add safe.directory '*'
       - name: West Update
         run: west update
       - name: West Zephyr export
