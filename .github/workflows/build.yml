@@ -26,15 +26,28 @@ jobs:
             zephyr/
             bootloader/
             zmk/
-          key: ${{ runner.os }}-modules-${{ hashFiles('manifest-dir/west.yml') }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-modules-
+      
+      - name: Check directory structure
+        run: ls -la
+
+      - name: Check config directory
+        run: ls -la config/
       
       - name: West Init
         run: west init -l config
       
+      - name: Verify west.yml format
+        run: |
+          echo "Content of west.yml:"
+          cat config/west.yml
+          echo "Running YAML validation:"
+          python3 -c "import yaml; yaml.safe_load(open('config/west.yml'))"
+      
       - name: West Update
-        run: west update
+        run: west update -v
       
       - name: West Zephyr export
         run: west zephyr-export
