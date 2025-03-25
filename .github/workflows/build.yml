@@ -30,31 +30,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
       
-      - name: West Init
-        run: west init -l config
-      
-      - name: West Update
-        run: west update --stats
-      
-      - name: West Zephyr export
-        run: west zephyr-export
-      
-      - name: Create Charybdis Module
+      - name: Create Shield Files Directly in ZMK's Shield Directory
         run: |
-          # 기존 파일 정리 (중복 파일 방지)
-          rm -rf config/modules
+          # 쉴드 파일을 ZMK 기본 쉴드 디렉토리에 직접 생성합니다
+          mkdir -p zmk/app/boards/shields/charybdis
           
-          # 디렉토리 생성
-          mkdir -p config/modules/charybdis
-          mkdir -p config/modules/charybdis/boards/shields/charybdis
-          
-          cat << 'EOF' > config/modules/charybdis/CMakeLists.txt
-          if(CONFIG_SHIELD_CHARYBDIS_LEFT OR CONFIG_SHIELD_CHARYBDIS_RIGHT)
-            zephyr_include_directories(.)
-          endif()
-          EOF
-          
-          cat << 'EOF' > config/modules/charybdis/Kconfig
+          cat << 'EOF' > zmk/app/boards/shields/charybdis/Kconfig.shield
           # Copyright (c) 2022 The ZMK Contributors
           # SPDX-License-Identifier: MIT
           
@@ -65,29 +46,7 @@ jobs:
             def_bool $(shields_list_contains,charybdis_right)
           EOF
           
-          cat << 'EOF' > config/modules/charybdis/Module.yml
-          name: charybdis
-          build:
-            cmake-ext: CMakeLists.txt
-            kconfig-ext: Kconfig
-            settings:
-              board:
-                root: boards/shields
-                board-root: boards/shields
-          EOF
-          
-          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/Kconfig.shield
-          # Copyright (c) 2022 The ZMK Contributors
-          # SPDX-License-Identifier: MIT
-          
-          config SHIELD_CHARYBDIS_LEFT
-            def_bool $(shields_list_contains,charybdis_left)
-          
-          config SHIELD_CHARYBDIS_RIGHT
-            def_bool $(shields_list_contains,charybdis_right)
-          EOF
-          
-          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/Kconfig.defconfig
+          cat << 'EOF' > zmk/app/boards/shields/charybdis/Kconfig.defconfig
           # Copyright (c) 2022 The ZMK Contributors
           # SPDX-License-Identifier: MIT
           
@@ -109,7 +68,7 @@ jobs:
           endif
           EOF
           
-          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/charybdis.dtsi
+          cat << 'EOF' > zmk/app/boards/shields/charybdis/charybdis.dtsi
           /*
            * Copyright (c) 2022 The ZMK Contributors
            *
@@ -128,7 +87,7 @@ jobs:
                   compatible = "zmk,matrix-transform";
                   columns = <12>;
                   rows = <4>;
-                  map = <
+                  map = 
           RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4) RC(0,5)                 RC(0,6) RC(0,7) RC(0,8) RC(0,9) RC(0,10) RC(0,11)
           RC(1,0) RC(1,1) RC(1,2) RC(1,3) RC(1,4) RC(1,5)                 RC(1,6) RC(1,7) RC(1,8) RC(1,9) RC(1,10) RC(1,11)
           RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4) RC(2,5)                 RC(2,6) RC(2,7) RC(2,8) RC(2,9) RC(2,10) RC(2,11)
@@ -169,7 +128,7 @@ jobs:
           };
           EOF
           
-          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/charybdis_left.overlay
+          cat << 'EOF' > zmk/app/boards/shields/charybdis/charybdis_left.overlay
           /*
            * Copyright (c) 2022 The ZMK Contributors
            *
@@ -206,7 +165,7 @@ jobs:
           };
           EOF
           
-          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/charybdis_right.overlay
+          cat << 'EOF' > zmk/app/boards/shields/charybdis/charybdis_right.overlay
           /*
            * Copyright (c) 2022 The ZMK Contributors
            *
@@ -243,68 +202,25 @@ jobs:
           };
           EOF
       
-      - name: Update west.yml to include charybdis module
-        run: |
-          cat << 'EOF' > config/west.yml
-          manifest:
-            remotes:
-              - name: zmkfirmware
-                url-base: https://github.com/zmkfirmware
-            projects:
-              - name: zmk
-                remote: zmkfirmware
-                revision: main
-                import: app/west.yml
-            self:
-              path: config
-              userdata:
-                modules:
-                  - name: charybdis
-                    path: modules/charybdis
-          EOF
+      - name: West Init
+        run: west init -l config
       
-      - name: Check Module Structure and Files
-        run: |
-          echo "===== 모듈 디렉토리 구조 ====="
-          find config/modules -type f | sort
-          
-          echo -e "\n===== 모듈 파일 내용 확인 ====="
-          echo "CMakeLists.txt:"
-          cat config/modules/charybdis/CMakeLists.txt
-          
-          echo -e "\nModule.yml:"
-          cat config/modules/charybdis/Module.yml
-          
-          echo -e "\nKconfig:"
-          cat config/modules/charybdis/Kconfig
-          
-          echo -e "\nKconfig.shield:"
-          cat config/modules/charybdis/boards/shields/charybdis/Kconfig.shield
-          
-          echo -e "\nKconfig.defconfig:"
-          cat config/modules/charybdis/boards/shields/charybdis/Kconfig.defconfig
-          
-          echo -e "\nWest.yml 내용:"
-          cat config/west.yml
+      - name: West Update
+        run: west update --stats
       
-      - name: West Build Debug Info
+      - name: West Zephyr export
+        run: west zephyr-export
+      
+      - name: Check Shield Structure
         run: |
-          echo "===== 현재 작업 디렉토리 구조 ====="
-          pwd
-          ls -la
+          echo "===== ZMK 쉴드 디렉토리 확인 ====="
+          ls -la zmk/app/boards/shields/
           
-          echo -e "\n===== ZMK 설정 디렉토리 구조 ====="
-          find config -type f | sort
-          
-          echo -e "\n===== West 모듈 정보 ====="
-          west list
-          
-          echo -e "\n===== West 설정 정보 ====="
-          west config -l
+          echo -e "\n===== Charybdis 쉴드 파일 확인 ====="
+          ls -la zmk/app/boards/shields/charybdis/
           
           echo -e "\n===== 사용 가능한 쉴드 목록 확인 ====="
-          echo "아래 명령은 help 출력으로 모든 쉴드가 표시되지 않을 수 있습니다."
-          west build -s zmk/app -b nice_nano_v2 -- --help 2>&1 || true
+          find zmk/app/boards/shields -name "*.overlay" | sort
       
       - name: West Build (Charybdis Left Half)
         run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
