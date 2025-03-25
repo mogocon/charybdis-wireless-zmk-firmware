@@ -11,3 +11,7 @@ manifest:
   
   self:
     path: config
+    userdata:
+      modules:
+        - name: charybdis
+          path: modules/charybdis

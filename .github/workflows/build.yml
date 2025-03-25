@@ -30,27 +30,96 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
       
-      - name: Create Shield Directory Structure
+      - name: West Init
+        run: west init -l config
+      
+      - name: West Update
+        run: west update --stats
+      
+      - name: West Zephyr export
+        run: west zephyr-export
+      
+      - name: Create Charybdis Module
         run: |
-          mkdir -p config/boards/shields/charybdis
-
-      - name: Create Shield Files
-        run: |
-          cat << 'EOF' > config/boards/shields/charybdis/charybdis.dtsi
+          mkdir -p config/modules/charybdis
+          mkdir -p config/modules/charybdis/boards/shields/charybdis
+          
+          cat << 'EOF' > config/modules/charybdis/CMakeLists.txt
+          if(CONFIG_SHIELD_CHARYBDIS_LEFT OR CONFIG_SHIELD_CHARYBDIS_RIGHT)
+            zephyr_include_directories(.)
+          endif()
+          EOF
+          
+          cat << 'EOF' > config/modules/charybdis/Kconfig
+          # Copyright (c) 2022 The ZMK Contributors
+          # SPDX-License-Identifier: MIT
+          
+          config SHIELD_CHARYBDIS_LEFT
+            def_bool $(shields_list_contains,charybdis_left)
+          
+          config SHIELD_CHARYBDIS_RIGHT
+            def_bool $(shields_list_contains,charybdis_right)
+          EOF
+          
+          cat << 'EOF' > config/modules/charybdis/Module.yml
+          name: charybdis
+          build:
+            cmake-ext: CMakeLists.txt
+            kconfig-ext: Kconfig
+            settings:
+              board:
+                root: boards/shields
+                board-root: boards/shields
+          EOF
+          
+          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/Kconfig.shield
+          # Copyright (c) 2022 The ZMK Contributors
+          # SPDX-License-Identifier: MIT
+          
+          config SHIELD_CHARYBDIS_LEFT
+            def_bool $(shields_list_contains,charybdis_left)
+          
+          config SHIELD_CHARYBDIS_RIGHT
+            def_bool $(shields_list_contains,charybdis_right)
+          EOF
+          
+          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/Kconfig.defconfig
+          # Copyright (c) 2022 The ZMK Contributors
+          # SPDX-License-Identifier: MIT
+          
+          if SHIELD_CHARYBDIS_LEFT
+          
+          config ZMK_KEYBOARD_NAME
+          default "Charybdis"
+          
+          config ZMK_SPLIT_ROLE_CENTRAL
+          default y
+          
+          endif
+          
+          if SHIELD_CHARYBDIS_LEFT || SHIELD_CHARYBDIS_RIGHT
+          
+          config ZMK_SPLIT
+          default y
+          
+          endif
+          EOF
+          
+          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/charybdis.dtsi
           /*
            * Copyright (c) 2022 The ZMK Contributors
            *
            * SPDX-License-Identifier: MIT
            */
-
+          
           #include <dt-bindings/zmk/matrix_transform.h>
-
+          
           / {
               chosen {
                   zmk,kscan = &kscan0;
                   zmk,matrix_transform = &default_transform;
               };
-
+          
               default_transform: keymap_transform_0 {
                   compatible = "zmk,matrix-transform";
                   columns = <12>;
@@ -63,13 +132,13 @@ jobs:
                                   RC(4,3) RC(4,4) RC(4,5) RC(4,6) RC(4,7) RC(4,8) RC(4,9) RC(4,10)
                   >;
               };
-
+          
               kscan0: kscan {
                   compatible = "zmk,kscan-gpio-matrix";
                   label = "KSCAN";
                   diode-direction = "col2row";
               };
-
+          
               left_encoder: encoder_left {
                   compatible = "alps,ec11";
                   label = "LEFT_ENCODER";
@@ -78,7 +147,7 @@ jobs:
                   resolution = <4>;
                   status = "disabled";
               };
-
+          
               right_encoder: encoder_right {
                   compatible = "alps,ec11";
                   label = "RIGHT_ENCODER";
@@ -87,7 +156,7 @@ jobs:
                   resolution = <4>;
                   status = "disabled";
               };
-
+          
               sensors {
                   compatible = "zmk,keymap-sensors";
                   sensors = <&left_encoder &right_encoder>;
@@ -95,20 +164,20 @@ jobs:
               };
           };
           EOF
-
-          cat << 'EOF' > config/boards/shields/charybdis/charybdis_left.overlay
+          
+          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/charybdis_left.overlay
           /*
            * Copyright (c) 2022 The ZMK Contributors
            *
            * SPDX-License-Identifier: MIT
            */
-
+          
           #include "charybdis.dtsi"
-
+          
           &default_transform {
               col-offset = <0>;
           };
-
+          
           &kscan0 {
               col-gpios
                   = <&gpio0 24 GPIO_ACTIVE_HIGH>
@@ -118,7 +187,7 @@ jobs:
                   , <&gpio0 16 GPIO_ACTIVE_HIGH>
                   , <&gpio0 14 GPIO_ACTIVE_HIGH>
                   ;
-
+          
               row-gpios
                   = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
                   , <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
@@ -127,25 +196,25 @@ jobs:
                   , <&gpio1 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
                   ;
           };
-
+          
           &left_encoder {
               status = "okay";
           };
           EOF
-
-          cat << 'EOF' > config/boards/shields/charybdis/charybdis_right.overlay
+          
+          cat << 'EOF' > config/modules/charybdis/boards/shields/charybdis/charybdis_right.overlay
           /*
            * Copyright (c) 2022 The ZMK Contributors
            *
            * SPDX-License-Identifier: MIT
            */
-
+          
           #include "charybdis.dtsi"
-
+          
           &default_transform {
               col-offset = <6>;
           };
-
+          
           &kscan0 {
               col-gpios
                   = <&gpio0 14 GPIO_ACTIVE_HIGH>
@@ -155,7 +224,7 @@ jobs:
                   , <&gpio0 22 GPIO_ACTIVE_HIGH>
                   , <&gpio0 24 GPIO_ACTIVE_HIGH>
                   ;
-
+          
               row-gpios
                   = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
                   , <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
@@ -164,31 +233,84 @@ jobs:
                   , <&gpio1 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
                   ;
           };
-
+          
           &right_encoder {
               status = "okay";
           };
           EOF
       
-      - name: Check shield directory structure
+      - name: Update west.yml to include charybdis module
         run: |
-          ls -la config/boards/shields/charybdis/
+          cat << 'EOF' > config/west.yml
+          manifest:
+            remotes:
+              - name: zmkfirmware
+                url-base: https://github.com/zmkfirmware
+            projects:
+              - name: zmk
+                remote: zmkfirmware
+                revision: main
+                import: app/west.yml
+            self:
+              path: config
+              userdata:
+                modules:
+                  - name: charybdis
+                    path: modules/charybdis
+          EOF
       
-      - name: West Init
-        run: west init -l config
-      
-      - name: Verify west.yml format
+      - name: Check Module Structure (상세)
         run: |
-          echo "Content of west.yml:"
-          cat config/west.yml
-          echo "Running YAML validation:"
-          python3 -c "import yaml; yaml.safe_load(open('config/west.yml'))"
+          echo "===== 전체 모듈 디렉토리 구조 ====="
+          find config/modules -type f | sort
+          
+          echo ""
+          echo "===== 중요 파일 내용 확인 ====="
+          echo "CMakeLists.txt:"
+          cat config/modules/charybdis/CMakeLists.txt
+          
+          echo ""
+          echo "Module.yml:"
+          cat config/modules/charybdis/Module.yml
+          
+          echo ""
+          echo "Kconfig.shield:"
+          cat config/modules/charybdis/boards/shields/charybdis/Kconfig.shield
+          
+          echo ""
+          echo "Kconfig.defconfig:"
+          cat config/modules/charybdis/boards/shields/charybdis/Kconfig.defconfig
+          
+          echo ""
+          echo "charybdis_left.overlay 시작 부분:"
+          head -15 config/modules/charybdis/boards/shields/charybdis/charybdis_left.overlay
       
-      - name: West Update
-        run: west update --stats
-      
-      - name: West Zephyr export
-        run: west zephyr-export
+      - name: Build Debug Info (상세)
+        run: |
+          echo "===== 현재 작업 디렉토리 구조 ====="
+          pwd
+          ls -la
+          
+          echo ""
+          echo "===== ZMK 설정 디렉토리 구조 ====="
+          find config -type f | sort
+          
+          echo ""
+          echo "===== West 모듈 정보 ====="
+          west list
+          
+          echo ""
+          echo "===== West 설정 정보 ====="
+          west config --show
+          
+          echo ""
+          echo "===== 사용 가능한 쉴드 목록 확인 ====="
+          # 쉴드 목록을 출력하기 위한 명령어 (오류가 발생할 수 있음)
+          west build -s zmk/app -b nice_nano_v2 -- --help 2>&1 || true
+          
+          echo ""
+          echo "===== ZMK 애플리케이션 정보 ====="
+          ls -la zmk/app 2>/dev/null || echo "zmk/app 디렉토리를 찾을 수 없습니다"
       
       - name: West Build (Charybdis Left Half)
         run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
