@@ -47,7 +47,7 @@ jobs:
           python3 -c "import yaml; yaml.safe_load(open('config/west.yml'))"
       
       - name: West Update
-        run: west update -v
+        run: west update --stats
       
       - name: West Zephyr export
         run: west zephyr-export
