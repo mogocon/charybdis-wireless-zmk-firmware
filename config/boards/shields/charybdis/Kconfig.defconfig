@@ -4,16 +4,20 @@
 if SHIELD_CHARYBDIS_LEFT
 
 config ZMK_KEYBOARD_NAME
-default "Charybdis"
+    default "Charybdis"
 
 config ZMK_SPLIT_ROLE_CENTRAL
-default y
+    default y
 
 endif
 
 if SHIELD_CHARYBDIS_LEFT || SHIELD_CHARYBDIS_RIGHT
 
 config ZMK_SPLIT
-default y
+    default y
+
+# 트랙볼 지원 활성화
+config ZMK_MOUSE
+    default y
 
 endif

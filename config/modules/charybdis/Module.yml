@@ -1,8 +1,0 @@
-name: charybdis
-build:
-  cmake-ext: CMakeLists.txt
-  kconfig-ext: Kconfig
-  settings:
-    board:
-      root: boards/shields
-      board-root: boards/shields

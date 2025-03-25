@@ -1,3 +1,0 @@
-if(CONFIG_SHIELD_CHARYBDIS_LEFT OR CONFIG_SHIELD_CHARYBDIS_RIGHT)
-  zephyr_include_directories(.)
-endif()

@@ -6,10 +6,6 @@
 
 #include "charybdis.dtsi"
 
-&default_transform {
-    col-offset = <0>;
-};
-
 &kscan0 {
     col-gpios
         = <&gpio0 24 GPIO_ACTIVE_HIGH>
@@ -29,6 +25,10 @@
         ;
 };
 
-&left_encoder {
+&trackball {
+    cs-gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
+    spi-max-frequency = <1000000>;
     status = "okay";
+    // PMW3360 트랙볼 센서는 SPI 인터페이스 사용
+    compatible = "pixart,pmw3360";
 };

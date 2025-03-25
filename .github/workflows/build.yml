@@ -39,36 +39,20 @@ jobs:
       - name: West Zephyr export
         run: west zephyr-export
       
-      - name: Show Available Shields
-        run: |
-          echo "===== 사용 가능한 쉴드 목록 ====="
-          find zmk/app/boards/shields -name "*.overlay" | sort
+      - name: West Build (Charybdis Left Half)
+        run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
       
-      - name: West Build (Left Half - Using Corne Shield)
-        run: |
-          # config 디렉토리 구조 확인
-          ls -la config/
-          
-          # Corne 쉴드를 사용하여 Charybdis 키맵으로 빌드
-          west build -s zmk/app -b nice_nano_v2 -- \
-            -DSHIELD=corne_left \
-            -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
-      
-      - name: Left Half Artifacts
+      - name: Charybdis Left Artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: charybdis_left-zmk-firmware
           path: build/zephyr/zmk.uf2
       
-      - name: West Build (Right Half - Using Corne Shield)
-        run: |
-          # Corne 쉴드를 사용하여 Charybdis 키맵으로 빌드
-          west build --pristine -s zmk/app -b nice_nano_v2 -- \
-            -DSHIELD=corne_right \
-            -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      - name: West Build (Charybdis Right Half)
+        run: west build --pristine -s zmk/app -b nice_nano_v2 -- -DSHIELD=charybdis_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
       
-      - name: Right Half Artifacts
+      - name: Charybdis Right Artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
