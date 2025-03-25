@@ -1,27 +1,29 @@
 /*
- * Copyright (c) 2023 The ZMK Contributors
+ * Copyright (c) 2022 The ZMK Contributors
  *
  * SPDX-License-Identifier: MIT
  */
 
-/dts-v1/;
 #include "charybdis.dtsi"
-#include "charybdis_right-pinctrl.dtsi"
 
 / {
+    model = "Charybdis Right";
+    compatible = "bastardkb,charybdis";
+
     chosen {
         zmk,kscan = &kscan0;
+        zmk,matrix-transform = &splinky_transform;
     };
 
     kscan0: kscan {
         col-gpios
-            = <&gpio1 3 GPIO_ACTIVE_HIGH>
-            , <&gpio1 2 GPIO_ACTIVE_HIGH>
-            , <&gpio1 1 GPIO_ACTIVE_HIGH>
-            , <&gpio1 0 GPIO_ACTIVE_HIGH>
+            = <&gpio0 29 GPIO_ACTIVE_HIGH>
             , <&gpio0 31 GPIO_ACTIVE_HIGH>
-            , <&gpio0 30 GPIO_ACTIVE_HIGH>
-            , <&gpio0 29 GPIO_ACTIVE_HIGH>
+            , <&gpio0 2  GPIO_ACTIVE_HIGH>
+            , <&gpio1 15 GPIO_ACTIVE_HIGH>
+            , <&gpio1 13 GPIO_ACTIVE_HIGH>
+            , <&gpio1 10 GPIO_ACTIVE_HIGH>
+            , <&gpio1 11 GPIO_ACTIVE_HIGH>
             ;
     };
 };
@@ -30,6 +32,6 @@
     col-offset = <6>;
 };
 
-&usbd {
-    status = "okay";
+&splinky_transform {
+    col-offset = <6>;
 };

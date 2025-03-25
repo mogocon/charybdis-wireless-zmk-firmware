@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'config/**'
+      - '.github/workflows/build.yml'
+  pull_request:
+    paths:
+      - 'config/**'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:3.2
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - board: nice_nano_v2
+            shield: splinky_v2_left
+          - board: nice_nano_v2
+            shield: splinky_v2_right
+          - board: nice_nano_v2
+            shield: settings_reset
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Cache west modules
+        uses: actions/cache@v3.0.11
+        env:
+          cache-name: cache-zephyr-modules
+        with:
+          path: |
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('config/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: West Init
+        run: west init -l config
+      - name: West Update
+        run: west update
+      - name: West Zephyr export
+        run: west zephyr-export
+      - name: West Build (${{ matrix.board }} - ${{ matrix.shield }})
+        run: west build -s zmk/app -b ${{ matrix.board }} -- -DSHIELD=${{ matrix.shield }} -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      - name: Rename artifacts
+        if: ${{ matrix.shield != 'settings_reset' }}
+        run: |
+          mkdir -p artifacts
+          cp build/zephyr/zmk.uf2 "artifacts/${{ matrix.shield }}.uf2"
+      - name: Rename artifacts (settings_reset)
+        if: ${{ matrix.shield == 'settings_reset' }}
+        run: |
+          mkdir -p artifacts
+          cp build/zephyr/zmk.uf2 "artifacts/settings_reset.uf2"
+      - name: Archive firmware
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: artifacts/*.uf2

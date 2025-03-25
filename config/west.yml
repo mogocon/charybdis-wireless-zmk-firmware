@@ -2,12 +2,12 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    - name: krikun98
-      url-base: https://github.com/krikun98
+    - name: perillamint
+      url-base: https://github.com/perillamint
   projects:
     - name: zmk
-      remote: zmkfirmware
-      revision: main
+      remote: perillamint
+      revision: charybdis-pmw3610
       import: app/west.yml
   self:
     path: config
